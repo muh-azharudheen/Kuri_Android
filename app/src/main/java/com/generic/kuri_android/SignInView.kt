@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +34,7 @@ import com.generic.kuri_android.ui.theme.Kuri_AndroidTheme
 fun SignInView(modifier: Modifier = Modifier, viewModel: SignInViewModel) {
 
     val isLoading = viewModel.isLoading.value
+    val shouldShowErrorAlert = viewModel.shouldShowError.value
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = { SignInAppBar() }
@@ -46,8 +49,34 @@ fun SignInView(modifier: Modifier = Modifier, viewModel: SignInViewModel) {
                     SignInLoadingView(Modifier.align(Alignment.Center))
                 }
             }
+
+            if (shouldShowErrorAlert) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    SignInErrorAlert {
+                        viewModel.shouldShowError.value = false
+                    }
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun SignInErrorAlert(onDismissRequest: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text("Sign In Error")
+        },
+        text = {
+            Text(text = "Couldn't Login.! Please ensure valid username/password is used.")
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = "OK")
+            }
+        }
+    )
 }
 
 @Composable
@@ -77,7 +106,6 @@ private fun SignInStack(viewModel: SignInViewModel, isLoading: Boolean) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
-            visualTransformation = PasswordVisualTransformation(),
             label = {
                 Text("Username")
             },
@@ -90,6 +118,7 @@ private fun SignInStack(viewModel: SignInViewModel, isLoading: Boolean) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
+            visualTransformation = PasswordVisualTransformation(),
             label = {
                 Text("Password")
             },
